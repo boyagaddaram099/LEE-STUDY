@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { Topic, Course, Subject } from '../types';
 import { AudioPlayerBar } from './AudioPlayerBar';
-import { TopicDiagramViewer } from './TopicDiagramViewer';
 import { enrichTopicContent } from '../utils/topicNotesEnricher';
 import { 
   ArrowLeft, 
@@ -13,15 +12,10 @@ import {
   BookOpen, 
   Share2, 
   Sparkles, 
-  FileText, 
   ChevronRight, 
   ChevronLeft,
   Zap,
   Info,
-  Table,
-  Workflow,
-  Scale,
-  Calendar,
   Lightbulb,
   Search,
   Copy,
@@ -130,8 +124,6 @@ export const TopicReaderView: React.FC = () => {
   const isDownloaded = currentTopic ? (userProgress.offlineDownloadedTopicIds || []).includes(currentTopic.id) : false;
   const isCompleted = currentTopic ? (userProgress.completedTopicIds || []).includes(currentTopic.id) : false;
 
-  const [activeTab, setActiveTab] = useState<'notes' | 'quick-facts' | 'key-points' | 'diagrams'>('notes');
-
   // Enriched notes content (adds deep academic sections, tables, case laws, mnemonics, timeline, and PYQs)
   const enrichedContent = useMemo(() => {
     if (!currentTopic) return null;
@@ -175,17 +167,8 @@ export const TopicReaderView: React.FC = () => {
   const courseTitle = language === 'te' ? currentCourse.titleTe : language === 'hi' ? currentCourse.titleHi : currentCourse.title;
 
   const overview = language === 'te' ? (enrichedContent.overviewTe || enrichedContent.overview) : language === 'hi' ? (enrichedContent.overviewHi || enrichedContent.overview) : enrichedContent.overview;
-  const quickFacts = language === 'te' && enrichedContent.quickFactsTe ? enrichedContent.quickFactsTe : language === 'hi' && enrichedContent.quickFactsHi ? enrichedContent.quickFactsHi : (enrichedContent.quickFacts || []);
-  const revisionPoints = language === 'te' && enrichedContent.revisionPointsTe ? enrichedContent.revisionPointsTe : language === 'hi' && enrichedContent.revisionPointsHi ? enrichedContent.revisionPointsHi : (enrichedContent.revisionPoints || []);
   const apFocus = language === 'te' ? (enrichedContent.apSpecificFocusTe || enrichedContent.apSpecificFocus) : (enrichedContent.apSpecificFocus || '');
-
-  const tables = enrichedContent.tables || [];
-  const diagrams = enrichedContent.diagrams || [];
-  const caseLaws = enrichedContent.caseLaws || [];
   const mnemonics = enrichedContent.mnemonics || [];
-  const timeline = enrichedContent.timeline || [];
-  const pyqInsights = enrichedContent.pyqInsights || [];
-  const faqs = enrichedContent.faqs || [];
 
   // Build spoken text for Audio Player
   const fullTextToSpeak = useMemo(() => {
@@ -212,7 +195,8 @@ export const TopicReaderView: React.FC = () => {
   };
 
   const handleCopyNotesSummary = () => {
-    const summaryText = `${topicTitle}\n\nOVERVIEW:\n${overview}\n\nKEY TAKEAWAYS:\n${revisionPoints.join('\n- ')}\n\n(Source: LEE STUDY - AP Competitive Exams Platform)`;
+    const keyTakeaways = enrichedContent.sections.flatMap(s => s.keyPoints || []).slice(0, 5);
+    const summaryText = `${topicTitle}\n\nOVERVIEW:\n${overview}${keyTakeaways.length > 0 ? `\n\nKEY TAKEAWAYS:\n- ${keyTakeaways.join('\n- ')}` : ''}\n\n(Source: LEE STUDY - AP Competitive Exams Platform)`;
     navigator.clipboard.writeText(summaryText);
     setIsCopied(true);
     showToast('Chapter notes summary copied to clipboard!');
@@ -227,7 +211,7 @@ export const TopicReaderView: React.FC = () => {
       : 'text-xs sm:text-sm md:text-base leading-relaxed';
 
   return (
-    <div className="py-6 sm:py-8 max-w-4xl mx-auto px-3 sm:px-6 overflow-x-hidden relative">
+    <div className="py-6 sm:py-8 pb-24 md:pb-12 max-w-4xl mx-auto px-3 sm:px-6 overflow-x-hidden relative">
       
       {/* Scroll Progress Bar at top */}
       <div className="fixed top-0 left-0 right-0 h-1 bg-slate-900 z-50">
@@ -375,259 +359,144 @@ export const TopicReaderView: React.FC = () => {
         />
       </div>
 
-      {/* Primary Tabs: Detailed Chapter Notes | Quick Facts Table | High-Yield Revision */}
-      <div className="flex items-center gap-1.5 sm:gap-2 border-b border-slate-800 pb-3 mb-6 text-xs sm:text-sm font-semibold overflow-x-auto scrollbar-none">
-        <button
-          onClick={() => setActiveTab('notes')}
-          className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
-            activeTab === 'notes'
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-              : 'bg-slate-900 text-slate-400 hover:text-white'
-          }`}
-        >
-          <FileText className="w-3.5 h-3.5" />
-          <span>Detailed Chapter Notes</span>
-        </button>
-
-        {diagrams.length > 0 && (
-          <button
-            onClick={() => setActiveTab('diagrams')}
-            className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
-              activeTab === 'diagrams'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-                : 'bg-slate-900 text-slate-400 hover:text-white'
-            }`}
-          >
-            <Workflow className="w-3.5 h-3.5" />
-            <span>Concept & Hierarchy Diagrams ({diagrams.length})</span>
-          </button>
+      {/* Detailed Chapter Notes Body */}
+      <div className="space-y-6 mb-8">
+        
+        {/* Chapter Executive Overview Box */}
+        {overview && (
+          <div className="bg-slate-900/90 border border-blue-900/40 rounded-3xl p-4 sm:p-6 md:p-8 shadow-xl">
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <div className="flex items-center gap-2 text-xs font-bold text-blue-400 uppercase tracking-wider">
+                <Info className="w-4 h-4" />
+                <span>Chapter Executive Overview & Blueprint</span>
+              </div>
+              <span className="text-[11px] bg-blue-950 text-blue-300 border border-blue-800 px-2 py-0.5 rounded font-mono">
+                Syllabus Benchmark
+              </span>
+            </div>
+            <p className={`${fontBodyClass} text-slate-200 break-words`}>
+              {overview}
+            </p>
+          </div>
         )}
 
-        {quickFacts.length > 0 && (
-          <button
-            onClick={() => setActiveTab('quick-facts')}
-            className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
-              activeTab === 'quick-facts'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-                : 'bg-slate-900 text-slate-400 hover:text-white'
-            }`}
-          >
-            <Table className="w-3.5 h-3.5" />
-            <span>Fast Reference Table ({quickFacts.length})</span>
-          </button>
+        {/* In-Depth Sections list */}
+        {enrichedContent.sections.map((section, sIdx) => {
+          const secTitle = language === 'te' ? (section.titleTe || section.title) : language === 'hi' ? (section.titleHi || section.title) : section.title;
+          const secParas = language === 'te' && section.paragraphsTe ? section.paragraphsTe : language === 'hi' && section.paragraphsHi ? section.paragraphsHi : section.paragraphs;
+          const secKeyPoints = language === 'te' && section.keyPointsTe ? section.keyPointsTe : language === 'hi' && section.keyPointsHi ? section.keyPointsHi : section.keyPoints;
+          const secExamAlert = language === 'te' ? (section.examAlertTe || section.examAlert) : (section.examAlert || '');
+
+          return (
+            <div 
+              key={sIdx}
+              className="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 sm:p-6 md:p-8 shadow-xl space-y-4"
+            >
+              <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
+                <span className="w-7 h-7 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-bold text-xs flex items-center justify-center shrink-0">
+                  {sIdx + 1}
+                </span>
+                <h2 className="text-base sm:text-lg md:text-xl font-bold text-white tracking-tight break-words">
+                  {secTitle}
+                </h2>
+              </div>
+
+              <div className="space-y-3.5">
+                {secParas.map((para, pIdx) => (
+                  <p key={pIdx} className={`${fontBodyClass} text-slate-300 break-words`}>
+                    {para}
+                  </p>
+                ))}
+              </div>
+
+              {/* Section Key Takeaways */}
+              {secKeyPoints && secKeyPoints.length > 0 && (
+                <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800/80 mt-4">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 block mb-2">
+                    Key Takeaways & Core Rules:
+                  </span>
+                  <ul className="space-y-1.5 list-disc pl-5 text-xs sm:text-sm text-slate-300">
+                    {secKeyPoints.map((kp, kIdx) => (
+                      <li key={kIdx} className="leading-relaxed">{kp}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Exam Alert Note */}
+              {secExamAlert && (
+                <div className="p-3.5 rounded-2xl bg-amber-950/30 border border-amber-800/40 flex items-start gap-2.5 text-xs text-amber-200">
+                  <Zap className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-amber-400 font-bold block mb-0.5">High-Yield Exam Trap Alert:</strong>
+                    <span className="leading-relaxed">{secExamAlert}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        {/* Section: Memory Mnemonics & Recall Codes */}
+        {mnemonics.length > 0 && (
+          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 sm:p-6 md:p-8 shadow-xl space-y-4">
+            <div className="flex items-center gap-2.5 text-xs font-bold text-violet-400 uppercase tracking-wider border-b border-slate-800 pb-3">
+              <Lightbulb className="w-4 h-4" />
+              <span>Memory Mnemonics & Exam Speed Recall Codes</span>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3.5">
+              {mnemonics.map((m, mIdx) => {
+                const mTitle = language === 'te' ? (m.titleTe || m.title) : m.title;
+                const mTip = language === 'te' ? (m.tipTe || m.tip) : m.tip;
+
+                return (
+                  <div key={mIdx} className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <h4 className="text-xs sm:text-sm font-bold text-white">
+                        {mTitle}
+                      </h4>
+                      <span className="px-2.5 py-1 rounded-lg bg-violet-950 text-violet-300 border border-violet-800 font-mono font-bold text-xs">
+                        {m.acronym}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {m.breakdown.map((item, bIdx) => (
+                        <div key={bIdx} className="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-800/80 text-xs">
+                          <span className="w-5 h-5 rounded-md bg-violet-600/30 text-violet-300 font-bold flex items-center justify-center shrink-0">
+                            {item.letter}
+                          </span>
+                          <span className="text-slate-200">
+                            {language === 'te' && item.termTe ? item.termTe : item.term}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <p className="text-xs text-violet-300 bg-violet-950/40 p-2.5 rounded-xl border border-violet-900/50 leading-relaxed">
+                      <strong>Memory Trick: </strong> {mTip}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         )}
 
-        {revisionPoints.length > 0 && (
-          <button
-            onClick={() => setActiveTab('key-points')}
-            className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
-              activeTab === 'key-points'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-                : 'bg-slate-900 text-slate-400 hover:text-white'
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>High-Yield Revision Points ({revisionPoints.length})</span>
-          </button>
+        {/* AP Specific Focus Callout */}
+        {apFocus && (
+          <div className="p-4 sm:p-6 rounded-3xl bg-emerald-950/30 border border-emerald-800/60 shadow-xl">
+            <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">
+              <Sparkles className="w-4 h-4" />
+              <span>Andhra Pradesh State Specific Focus</span>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-200 leading-relaxed break-words">
+              {apFocus}
+            </p>
+          </div>
         )}
       </div>
-
-      {/* Tab 1: Detailed Chapter Notes */}
-      {activeTab === 'notes' && (
-        <div className="space-y-6 mb-8">
-          
-          {/* Chapter Executive Overview Box */}
-          {overview && (
-            <div className="bg-slate-900/90 border border-blue-900/40 rounded-3xl p-4 sm:p-6 md:p-8 shadow-xl">
-              <div className="flex items-center justify-between gap-2 mb-3">
-                <div className="flex items-center gap-2 text-xs font-bold text-blue-400 uppercase tracking-wider">
-                  <Info className="w-4 h-4" />
-                  <span>Chapter Executive Overview & Blueprint</span>
-                </div>
-                <span className="text-[11px] bg-blue-950 text-blue-300 border border-blue-800 px-2 py-0.5 rounded font-mono">
-                  Syllabus Benchmark
-                </span>
-              </div>
-              <p className={`${fontBodyClass} text-slate-200 break-words`}>
-                {overview}
-              </p>
-            </div>
-          )}
-
-          {/* In-Depth Sections list */}
-          {enrichedContent.sections.map((section, sIdx) => {
-            const secTitle = language === 'te' ? (section.titleTe || section.title) : language === 'hi' ? (section.titleHi || section.title) : section.title;
-            const secParas = language === 'te' && section.paragraphsTe ? section.paragraphsTe : language === 'hi' && section.paragraphsHi ? section.paragraphsHi : section.paragraphs;
-            const secKeyPoints = language === 'te' && section.keyPointsTe ? section.keyPointsTe : language === 'hi' && section.keyPointsHi ? section.keyPointsHi : section.keyPoints;
-            const secExamAlert = language === 'te' ? (section.examAlertTe || section.examAlert) : (section.examAlert || '');
-
-            return (
-              <div 
-                key={sIdx}
-                className="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 sm:p-6 md:p-8 shadow-xl space-y-4"
-              >
-                <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
-                  <span className="w-7 h-7 rounded-xl bg-blue-600/20 border border-blue-500/30 text-blue-400 font-bold text-xs flex items-center justify-center shrink-0">
-                    {sIdx + 1}
-                  </span>
-                  <h2 className="text-base sm:text-lg md:text-xl font-bold text-white tracking-tight break-words">
-                    {secTitle}
-                  </h2>
-                </div>
-
-                <div className="space-y-3.5">
-                  {secParas.map((para, pIdx) => (
-                    <p key={pIdx} className={`${fontBodyClass} text-slate-300 break-words`}>
-                      {para}
-                    </p>
-                  ))}
-                </div>
-
-                {/* Section Key Takeaways */}
-                {secKeyPoints && secKeyPoints.length > 0 && (
-                  <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800/80 mt-4">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 block mb-2">
-                      Key Takeaways & Core Rules:
-                    </span>
-                    <ul className="space-y-1.5 list-disc pl-5 text-xs sm:text-sm text-slate-300">
-                      {secKeyPoints.map((kp, kIdx) => (
-                        <li key={kIdx} className="leading-relaxed">{kp}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Exam Alert Note */}
-                {secExamAlert && (
-                  <div className="p-3.5 rounded-2xl bg-amber-950/30 border border-amber-800/40 flex items-start gap-2.5 text-xs text-amber-200">
-                    <Zap className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                    <div>
-                      <strong className="text-amber-400 font-bold block mb-0.5">High-Yield Exam Trap Alert:</strong>
-                      <span className="leading-relaxed">{secExamAlert}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-
-          {/* Section: Conceptual Architecture & Visual Diagrams */}
-          {diagrams.length > 0 && (
-            <TopicDiagramViewer diagrams={diagrams} language={language} />
-          )}
-
-          {/* Section: Memory Mnemonics & Recall Codes */}
-          {mnemonics.length > 0 && (
-            <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 sm:p-6 md:p-8 shadow-xl space-y-4">
-              <div className="flex items-center gap-2.5 text-xs font-bold text-violet-400 uppercase tracking-wider border-b border-slate-800 pb-3">
-                <Lightbulb className="w-4 h-4" />
-                <span>Memory Mnemonics & Exam Speed Recall Codes</span>
-              </div>
-
-              <div className="grid grid-cols-1 gap-3.5">
-                {mnemonics.map((m, mIdx) => {
-                  const mTitle = language === 'te' ? (m.titleTe || m.title) : m.title;
-                  const mTip = language === 'te' ? (m.tipTe || m.tip) : m.tip;
-
-                  return (
-                    <div key={mIdx} className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <h4 className="text-xs sm:text-sm font-bold text-white">
-                          {mTitle}
-                        </h4>
-                        <span className="px-2.5 py-1 rounded-lg bg-violet-950 text-violet-300 border border-violet-800 font-mono font-bold text-xs">
-                          {m.acronym}
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {m.breakdown.map((item, bIdx) => (
-                          <div key={bIdx} className="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-800/80 text-xs">
-                            <span className="w-5 h-5 rounded-md bg-violet-600/30 text-violet-300 font-bold flex items-center justify-center shrink-0">
-                              {item.letter}
-                            </span>
-                            <span className="text-slate-200">
-                              {language === 'te' && item.termTe ? item.termTe : item.term}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-
-                      <p className="text-xs text-violet-300 bg-violet-950/40 p-2.5 rounded-xl border border-violet-900/50 leading-relaxed">
-                        <strong>Memory Trick: </strong> {mTip}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* AP Specific Focus Callout */}
-          {apFocus && (
-            <div className="p-4 sm:p-6 rounded-3xl bg-emerald-950/30 border border-emerald-800/60 shadow-xl">
-              <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">
-                <Sparkles className="w-4 h-4" />
-                <span>Andhra Pradesh State Specific Focus</span>
-              </div>
-              <p className="text-xs sm:text-sm text-slate-200 leading-relaxed break-words">
-                {apFocus}
-              </p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Tab: Standalone Visual Diagrams & Charts View */}
-      {activeTab === 'diagrams' && diagrams.length > 0 && (
-        <div className="mb-8">
-          <TopicDiagramViewer diagrams={diagrams} language={language} />
-        </div>
-      )}
-
-      {/* Tab 2: Quick Facts Fast Reference Grid */}
-      {activeTab === 'quick-facts' && quickFacts.length > 0 && (
-        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 sm:p-6 md:p-8 mb-8 shadow-xl">
-          <h3 className="text-base sm:text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <Table className="w-5 h-5 text-blue-400" />
-            <span>AP State Exam Fast Reference Points</span>
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            {quickFacts.map((fact, fIdx) => (
-              <div key={fIdx} className="p-3.5 sm:p-4 rounded-2xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition-colors">
-                <span className="text-[11px] font-bold text-blue-400 block uppercase tracking-wider mb-1">
-                  {fact.label}
-                </span>
-                <span className="text-xs sm:text-sm font-semibold text-white break-words">
-                  {fact.val}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Tab 3: High-Yield Key Points */}
-      {activeTab === 'key-points' && revisionPoints.length > 0 && (
-        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 sm:p-6 md:p-8 mb-8 shadow-xl">
-          <h3 className="text-base sm:text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-emerald-400" />
-            <span>Direct Repeat / Last-Minute Revision Nuggets</span>
-          </h3>
-          <div className="space-y-3">
-            {revisionPoints.map((point, kIdx) => (
-              <div key={kIdx} className="p-3.5 sm:p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-start gap-3">
-                <div className="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
-                  {kIdx + 1}
-                </div>
-                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed break-words">
-                  {point}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Bottom Floating/Fixed Action Banner */}
       <div className="bg-slate-900 border border-blue-800/40 rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-10">

@@ -118,7 +118,7 @@ export const CourseDetailView: React.FC = () => {
   }, [currentCourse, searchQuery, filterMode, userProgress.completedTopicIds]);
 
   return (
-    <div className="py-6 sm:py-8 max-w-7xl mx-auto px-3 sm:px-6 overflow-x-hidden">
+    <div className="py-6 sm:py-8 pb-24 md:pb-12 max-w-7xl mx-auto px-3 sm:px-6 overflow-x-hidden">
       
       {/* Back Button */}
       <button

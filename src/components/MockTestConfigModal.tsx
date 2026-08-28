@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 
 interface MockTestConfigModalProps {
-  testTemplate: MockTest;
+  testTemplate?: MockTest | null;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -31,6 +31,7 @@ export const MockTestConfigModal: React.FC<MockTestConfigModalProps> = ({
   onClose
 }) => {
   const { 
+    mockTests,
     userProgress, 
     startCustomMockTest, 
     resetAttemptedQuestions, 
@@ -38,10 +39,19 @@ export const MockTestConfigModal: React.FC<MockTestConfigModalProps> = ({
     showToast 
   } = useApp();
 
+  const effectiveTemplate = testTemplate || mockTests[0] || null;
+
   const [questionCount, setQuestionCount] = useState<number>(50);
   const [preventRepeat, setPreventRepeat] = useState<boolean>(true);
-  const [negativeMarking, setNegativeMarking] = useState<number>(testTemplate.negativeMarking || 0.33);
+  const [negativeMarking, setNegativeMarking] = useState<number>(effectiveTemplate?.negativeMarking ?? 0.33);
   const [customTime, setCustomTime] = useState<number>(60);
+
+  // Sync state if effectiveTemplate changes
+  React.useEffect(() => {
+    if (effectiveTemplate?.negativeMarking !== undefined) {
+      setNegativeMarking(effectiveTemplate.negativeMarking);
+    }
+  }, [effectiveTemplate?.id, effectiveTemplate?.negativeMarking]);
 
   // Sync custom time when question count changes
   const handleQuestionCountChange = (count: number) => {
@@ -54,16 +64,20 @@ export const MockTestConfigModal: React.FC<MockTestConfigModalProps> = ({
   
   // Real-time pool telemetry for this test category
   const poolStats = useMemo(() => {
-    return getCategoryQuestionStats(testTemplate.category, attemptedIds);
-  }, [testTemplate.category, attemptedIds]);
+    if (!effectiveTemplate) {
+      return { totalQuestions: 0, attempted: 0, unattempted: 0, subjects: [] };
+    }
+    return getCategoryQuestionStats(effectiveTemplate.category, attemptedIds);
+  }, [effectiveTemplate?.category, attemptedIds]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !effectiveTemplate) return null;
 
-  const title = language === 'te' ? testTemplate.titleTe : language === 'hi' ? testTemplate.titleHi : testTemplate.title;
+  const title = language === 'te' ? (effectiveTemplate.titleTe || effectiveTemplate.title) : language === 'hi' ? (effectiveTemplate.titleHi || effectiveTemplate.title) : effectiveTemplate.title;
 
   const handleLaunch = () => {
+    if (!effectiveTemplate) return;
     const generated = generateDynamicMockTest({
-      baseTest: testTemplate,
+      baseTest: effectiveTemplate,
       targetQuestionCount: questionCount,
       customDurationMinutes: customTime,
       customNegativeMarking: negativeMarking,
@@ -90,7 +104,7 @@ export const MockTestConfigModal: React.FC<MockTestConfigModalProps> = ({
           <div>
             <div className="flex items-center gap-2 mb-1.5">
               <span className="px-2.5 py-0.5 rounded-full bg-emerald-950/90 border border-emerald-800/80 text-[11px] font-bold text-emerald-300">
-                {testTemplate.targetExam}
+                {effectiveTemplate.targetExam}
               </span>
               <span className="flex items-center gap-1 text-[11px] font-semibold text-sky-400 bg-sky-950/60 px-2 py-0.5 rounded-full border border-sky-800/60">
                 <Sliders className="w-3 h-3" />

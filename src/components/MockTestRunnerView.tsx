@@ -256,7 +256,7 @@ export const MockTestRunnerView: React.FC = () => {
   });
 
   return (
-    <div className="w-full min-h-screen bg-slate-950 pb-20 overflow-x-hidden">
+    <div className="w-full min-h-screen bg-slate-950 pb-28 md:pb-16 overflow-x-hidden">
       
       {/* Top Test Navigation Bar */}
       <div className="sticky top-16 z-30 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-3 sm:px-6 py-2.5 sm:py-3 shadow-md">
@@ -412,7 +412,7 @@ export const MockTestRunnerView: React.FC = () => {
                           ) : (
                             <>
                               <XCircle className="w-3.5 h-3.5 shrink-0" />
-                              <span className="whitespace-nowrap">Wrong (-{activeMockTest.negativeMarking || 0.33})</span>
+                              <span className="whitespace-nowrap">Wrong (-{activeMockTest?.negativeMarking ?? 0.33})</span>
                             </>
                           )}
                         </div>
@@ -520,7 +520,7 @@ export const MockTestRunnerView: React.FC = () => {
                             </span>
                           ) : (
                             <span className="flex items-center gap-1.5 text-xs font-bold text-rose-400 uppercase tracking-wider">
-                              <XCircle className="w-4 h-4 shrink-0" /> Incorrect. Correct: Option {['A', 'B', 'C', 'D'][currentQ.correctIndex]} (-{activeMockTest.negativeMarking || 0.33})
+                              <XCircle className="w-4 h-4 shrink-0" /> Incorrect. Correct: Option {['A', 'B', 'C', 'D'][currentQ.correctIndex]} (-{activeMockTest?.negativeMarking ?? 0.33})
                             </span>
                           )}
                         </div>
@@ -723,7 +723,7 @@ export const MockTestRunnerView: React.FC = () => {
                 {title}
               </h2>
               <p className="text-xs sm:text-sm text-slate-400 mb-6 max-w-xl mx-auto">
-                Graded with AP State Rubric ({activeMockTest.negativeMarking > 0 ? `-${activeMockTest.negativeMarking} penalty for wrong answers` : 'No negative marking'}).
+                Graded with AP State Rubric ({(activeMockTest?.negativeMarking ?? 0) > 0 ? `-${activeMockTest?.negativeMarking} penalty for wrong answers` : 'No negative marking'}).
               </p>
 
               {/* 4 Stat Boxes */}
@@ -867,7 +867,7 @@ export const MockTestRunnerView: React.FC = () => {
                             </span>
                           ) : (
                             <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-rose-950 text-rose-400 text-[10px] sm:text-xs font-bold border border-rose-800 shrink-0 whitespace-nowrap">
-                              -{activeMockTest.negativeMarking} Penalty
+                              -{activeMockTest?.negativeMarking ?? 0.33} Penalty
                             </span>
                           )}
                         </div>

@@ -42,18 +42,18 @@ export const NotificationsView: React.FC = () => {
   });
 
   return (
-    <div className="py-8 sm:py-12 max-w-7xl mx-auto px-4 sm:px-6">
+    <div className="py-6 sm:py-10 pb-24 md:pb-12 max-w-7xl mx-auto px-3.5 sm:px-6">
       
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-400 mb-1">
           <Bell className="w-4 h-4" />
           <span>Andhra Pradesh Official Recruitment Alerts</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight mb-2 sm:mb-3 break-words">
           Latest AP Government Job Notifications
         </h1>
-        <p className="text-sm sm:text-base text-slate-400 max-w-3xl">
+        <p className="text-xs sm:text-sm lg:text-base text-slate-400 max-w-3xl">
           Real-time verified announcements, eligibility criteria, vacancy breakdowns, application deadlines, and exam schedules directly from APPSC, APSLPRB, and AP Govt Departments.
         </p>
       </div>

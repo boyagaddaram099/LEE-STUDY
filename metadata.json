@@ -1,6 +1,6 @@
 {
-  "name": "LEE STUDY - AP Competitive Exam Learning Platform",
-  "description": "Premium multilingual learning platform for Andhra Pradesh competitive exams (APPSC, DSC, Police, Secretariat) with audio notes, practice exams, mock tests, and job notifications.",
+  "name": "LEE STUDY - Welcome to LEE STUDY",
+  "description": "Cinematic experience with seamless looping video background, Instrument Serif typography, and fluid transitions.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

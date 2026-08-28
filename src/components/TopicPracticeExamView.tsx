@@ -189,7 +189,7 @@ export const TopicPracticeExamView: React.FC = () => {
   const isCurrentCorrect = isCurrentAnswered && currentAnswer === currentQ.correctIndex;
 
   return (
-    <div className="py-6 sm:py-8 max-w-4xl mx-auto px-3 sm:px-6 overflow-x-hidden">
+    <div className="py-6 sm:py-8 pb-24 md:pb-12 max-w-4xl mx-auto px-3 sm:px-6 overflow-x-hidden">
       
       {/* Top Breadcrumb & Controls */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">

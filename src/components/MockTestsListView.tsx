@@ -68,45 +68,47 @@ export const MockTestsListView: React.FC = () => {
   };
 
   return (
-    <div className="py-8 sm:py-12 max-w-7xl mx-auto px-4 sm:px-6">
+    <div className="py-6 sm:py-10 pb-24 md:pb-12 max-w-7xl mx-auto px-3.5 sm:px-6">
       
       {/* Header Banner */}
-      <div className="mb-8 bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+      <div className="mb-8 bg-slate-900/90 border border-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 relative overflow-hidden">
         <div className="relative z-10 max-w-3xl">
           <div className="flex flex-wrap items-center gap-2 mb-3">
-            <span className="px-3 py-1 rounded-full bg-emerald-950/90 border border-emerald-800/80 text-xs font-bold text-emerald-300 flex items-center gap-1.5 shadow-sm">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="px-2.5 sm:px-3 py-1 rounded-full bg-emerald-950/90 border border-emerald-800/80 text-[11px] sm:text-xs font-bold text-emerald-300 flex items-center gap-1.5 shadow-sm">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
               Guaranteed Zero-Repetition Engine Active
             </span>
-            <span className="px-3 py-1 rounded-full bg-sky-950/80 border border-sky-800/60 text-xs font-bold text-sky-300 flex items-center gap-1.5">
-              <Sliders className="w-3.5 h-3.5 text-sky-400" />
+            <span className="px-2.5 sm:px-3 py-1 rounded-full bg-sky-950/80 border border-sky-800/60 text-[11px] sm:text-xs font-bold text-sky-300 flex items-center gap-1.5">
+              <Sliders className="w-3.5 h-3.5 text-sky-400 shrink-0" />
               Configurable: 50 to 100 Questions
             </span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight mb-2.5 sm:mb-3 break-words">
             State-Level Grand Mock Tests
           </h1>
           
-          <p className="text-sm sm:text-base text-slate-300 leading-relaxed mb-4">
+          <p className="text-xs sm:text-sm lg:text-base text-slate-300 leading-relaxed mb-4">
             Simulate real APPSC, AP Police, AP DSC/TET, and State Secretariat exams. Choose between <strong className="text-emerald-400">50 to 100 questions per test</strong> with negative marking penalties (-0.33 / -0.25). Our intelligent question bank engine ensures you <strong className="text-sky-300">never face repeated questions</strong> across test sessions.
           </p>
 
-          <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-400">
-            <span className="flex items-center gap-1.5 text-emerald-400">
-              <CheckCircle2 className="w-4 h-4" />
-              Total Bank: 600+ Verified AP Questions
-            </span>
-            <span className="flex items-center gap-1.5 text-sky-400">
-              <CheckCircle2 className="w-4 h-4" />
-              {attemptedIds.length} Questions Attempted in your account
-            </span>
+          <div className="flex flex-wrap items-center justify-between gap-3 text-[11px] sm:text-xs font-medium text-slate-400">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+              <span className="flex items-center gap-1.5 text-emerald-400">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                Total Bank: 600+ Verified AP Questions
+              </span>
+              <span className="flex items-center gap-1.5 text-sky-400">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                {attemptedIds.length} Questions Solved
+              </span>
+            </div>
             {attemptedIds.length > 0 && (
               <button
                 onClick={resetAttemptedQuestions}
                 className="text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 hover:underline ml-auto"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <RotateCcw className="w-3.5 h-3.5 shrink-0" />
                 Reset Attempt History
               </button>
             )}
